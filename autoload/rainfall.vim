@@ -1,6 +1,6 @@
 scriptencoding utf-8
 
-let g:rainfall#url = 'https://tenki.jp/amedas/3/17/46106.html'
+let g:rainfall#url = 'https://tenki.jp/amedas/3/16/44132.html'
 let g:rainfall#show_amount = v:true
 let g:rainfall#prefix = 'raining: '
 let g:rainfall#postfix = ' mm'
@@ -14,6 +14,9 @@ function rainfall#enable() abort
   if s:timerid == 0
     " 5 分ごとに見に行く
     let s:timerid = timer_start(5 * 60 * 1000, function('s:show_rainfall'), {'repeat': -1})
+    if !has('vim_starting') | echo 'enabled' | endif
+  else
+    echo 'already enabled'
   endif
 endfunction
 
@@ -21,6 +24,9 @@ function rainfall#disable() abort
   if s:timerid != 0
     call timer_stop(s:timerid)
     let s:timerid = 0
+    echo 'disabled'
+  else
+    echo 'already disabled'
   endif
 endfunction
 
@@ -28,6 +34,8 @@ function rainfall#close() abort
   if s:winid != 0
     call popup_close(s:winid)
     let s:winid = 0
+  else
+    echo 'no window'
   endif
 endfunction
 
