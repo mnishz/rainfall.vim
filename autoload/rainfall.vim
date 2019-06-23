@@ -9,6 +9,7 @@ let g:rainfall#char = '☂'
 let g:rainfall#url = 'https://tenki.jp/amedas/3/16/44132.html'
 
 let s:last_datetime = ''
+let s:location = ''
 let s:amedas_updated = v:false
 let s:winid = 0
 let s:timerid = 0
@@ -54,6 +55,7 @@ function s:parse_and_show_new_rainfall(ch, msg) abort
   if a:msg =~# 'amedas-point-datetime' && a:msg !=# s:last_datetime
     " 前回見た時刻から更新されている
     let s:last_datetime = a:msg
+    let s:location = a:msg[match(a:msg, "<h2>")+4:match(a:msg, '(')-1]
     let s:amedas_updated = v:true
   endif
   if s:amedas_updated && a:msg =~# '10分値'
@@ -70,7 +72,7 @@ function s:parse_and_show_new_rainfall(ch, msg) abort
       else
         let l:text = g:rainfall#char .. g:rainfall#char .. g:rainfall#char
       endif
-      let s:winid = popup_create(l:text, {
+      let s:winid = popup_create(s:location .. ': ' .. l:text, {
             \ 'border': [],
             \ 'padding': [0, 1, 0, 1],
             \ 'line': &lines-5,
