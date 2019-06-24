@@ -12,10 +12,12 @@ let g:rainfall#url = 'https://tenki.jp/amedas/3/16/44132.html'
 
 let s:winid = 0
 let s:timerid = 0
+let s:last_msg = ''
 
 
 function rainfall#enable() abort
   if s:timerid == 0
+    let s:last_msg = ''
     call s:create_rainfall_job(0)
     " 5 分ごとに見に行く
     let s:timerid = timer_start(5 * 60 * 1000, function('s:create_rainfall_job'), {'repeat': -1})
@@ -40,6 +42,8 @@ endfunction
 
 function rainfall#close() abort
   if s:winid != 0
+    " close の場合は s:last_msg を保持したまま単に閉じる
+    " 内容が更新されたときだけ s:update_message() が再表示する
     call popup_close(s:winid)
     let s:winid = 0
   endif
@@ -76,36 +80,46 @@ endfunction
 function s:show_rainfall(ch) abort
   let l:location = s:parsed_data.datetime[match(s:parsed_data.datetime, "<h2>")+4:match(s:parsed_data.datetime, '(')-1]
   let l:amount = str2float(s:parsed_data.amount_str)
+
   if empty(s:parsed_data.datetime) || empty(l:location) || (s:parsed_data.amount_str !=# '0.0' && l:amount == 0.0)
-    call s:show_message('error')
+    call s:update_message('error')
+    return
+  endif
+
+  if l:amount == 0.0
+    " 降水量が 0 のときは 0 であることを保持したうえで、s:update_message() に消してもらう
+    call s:update_message('')
   else
-    if l:amount == 0.0
-      call rainfall#close()
+    let l:text = ''
+    if l:amount <= 1.0
+      let l:text = g:rainfall#char
+    elseif l:amount <= 2.0
+      let l:text = g:rainfall#char .. g:rainfall#char
     else
-      let l:text = ''
-      if l:amount <= 1.0
-        let l:text = g:rainfall#char
-      elseif l:amount <= 2.0
-        let l:text = g:rainfall#char .. g:rainfall#char
-      else
-        let l:text = g:rainfall#char .. g:rainfall#char .. g:rainfall#char
-      endif
-      call s:show_message(l:location .. ': ' .. l:text)
+      let l:text = g:rainfall#char .. g:rainfall#char .. g:rainfall#char
     endif
+    call s:update_message(l:location .. ': ' .. l:text)
   endif
 endfunction
 
 
-function s:show_message(msg) abort
-  if s:winid == 0
-    let s:winid = popup_create(a:msg, {
-          \ 'border': [],
-          \ 'padding': [0, 1, 0, 1],
-          \ 'line': &lines-5,
-          \ 'col': &columns-5,
-          \ 'pos': 'botright',
-          \ })
-  else
-    call popup_settext(s:winid, a:msg)
+function s:update_message(msg) abort
+  if a:msg !=# s:last_msg
+    let s:last_msg = a:msg
+    if empty(a:msg)
+      call rainfall#close()
+    else
+      if s:winid == 0
+        let s:winid = popup_create(a:msg, {
+              \ 'border': [],
+              \ 'padding': [0, 1, 0, 1],
+              \ 'line': &lines-5,
+              \ 'col': &columns-5,
+              \ 'pos': 'botright',
+              \ })
+      else
+        call popup_settext(s:winid, a:msg)
+      endif
+    endif
   endif
 endfunction
