@@ -42,16 +42,15 @@ endfunction
 
 
 let s:parsed_data = {
-      \ 'datetime': '',
-      \ 'amount_str': '',
+      \ 'location': '',
+      \ 'amount': 0.0,
       \ }
 
 
 function s:create_rainfall_job(timer) abort
   " initialization
-  let s:parsed_data.datetime = ''
-  let s:parsed_data.amount_str = ''
-  let l:job = job_start(['curl', g:rainfall#url], {
+  let s:parsed_data.location = ''
+  let l:job = job_start(['curl', 'https://www.data.jma.go.jp/obd/stats/data/mdrr/pre_rct/alltable/pre1h00_rct.csv'], {
         \ 'out_cb': function('s:parse_data'),
         \ 'close_cb': function('s:show_rainfall'),
         \ })
@@ -59,37 +58,33 @@ endfunction
 
 
 function s:parse_data(ch, msg) abort
-  if a:msg =~# 'amedas-point-datetime'
-    let s:parsed_data.datetime = a:msg
-  endif
-  if a:msg =~# '10分値'
-    let s:parsed_data.amount_str = a:msg[match(a:msg, "[0-9.]*mm"):match(a:msg, 'mm')-1]
+  if a:msg =~# '^' .. g:rainfall#location_number .. ','
+    let l:list = split(iconv(a:msg, 'sjis', 'utf-8'), ',')
+    let s:parsed_data.location = l:list[2][:match(l:list[2], '（')-1]
+    let s:parsed_data.amount = str2float(l:list[9])
   endif
 endfunction
 
 
 function s:show_rainfall(ch) abort
-  let l:location = s:parsed_data.datetime[match(s:parsed_data.datetime, "<h2>")+4:match(s:parsed_data.datetime, '(')-1]
-  let l:amount = str2float(s:parsed_data.amount_str)
-
-  if empty(s:parsed_data.datetime) || empty(l:location) || (s:parsed_data.amount_str !=# '0.0' && l:amount == 0.0)
+  if empty(s:parsed_data.location)
     call s:update_message('error')
     return
   endif
 
-  if l:amount == 0.0
+  if s:parsed_data.amount == 0.0
     " 降水量が 0 のときは 0 であることを保持したうえで、s:update_message() に消してもらう
     call s:update_message('')
   else
     let l:text = ''
-    if l:amount <= 1.0
+    if s:parsed_data.amount <= 1.0
       let l:text = g:rainfall#mark
-    elseif l:amount <= 2.0
+    elseif s:parsed_data.amount <= 2.0
       let l:text = g:rainfall#mark .. g:rainfall#mark
     else
       let l:text = g:rainfall#mark .. g:rainfall#mark .. g:rainfall#mark
     endif
-    call s:update_message(l:location .. ': ' .. l:text)
+    call s:update_message(s:parsed_data.location .. ': ' .. l:text)
   endif
 endfunction
 

@@ -15,7 +15,7 @@ set cpo&vim
 
 " parameters
 let g:rainfall#mark = get(g:, 'rainfall#mark', '☂')
-let g:rainfall#url = get(g:, 'rainfall#url', 'https://tenki.jp/amedas/3/16/44132.html')
+let g:rainfall#location_number = get(g:, 'rainfall#location_number', 44132)
 
 command RainfallEnable call rainfall#enable()
 command RainfallDisable call rainfall#disable()
