@@ -107,6 +107,7 @@ function s:update_message(msg) abort
               \ 'line': &lines-5,
               \ 'col': &columns-5,
               \ 'pos': 'botright',
+              \ 'tabpage': -1
               \ })
       else
         call popup_settext(s:winid, a:msg)
