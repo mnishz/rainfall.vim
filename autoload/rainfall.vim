@@ -10,10 +10,6 @@ let g:rainfall#char = '☂'
 let g:rainfall#url = 'https://tenki.jp/amedas/3/16/44132.html'
 
 
-let s:parsed_data = {
-      \ 'datetime': '',
-      \ 'amount_str': '',
-      \ }
 let s:winid = 0
 let s:timerid = 0
 
@@ -48,6 +44,12 @@ function rainfall#close() abort
     let s:winid = 0
   endif
 endfunction
+
+
+let s:parsed_data = {
+      \ 'datetime': '',
+      \ 'amount_str': '',
+      \ }
 
 
 function s:create_rainfall_job(timer) abort
