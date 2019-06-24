@@ -1,14 +1,5 @@
 scriptencoding utf-8
 
-" 現在の雨の強さによって傘のアイコンを出す
-"     1 mm 以下、傘 1 個
-"     2 mm 以下、傘 2 個
-"     2 mm 超え、傘 3 個
-
-" parameters
-let g:rainfall#char = '☂'
-let g:rainfall#url = 'https://tenki.jp/amedas/3/16/44132.html'
-
 
 let s:winid = 0
 let s:timerid = 0
@@ -92,11 +83,11 @@ function s:show_rainfall(ch) abort
   else
     let l:text = ''
     if l:amount <= 1.0
-      let l:text = g:rainfall#char
+      let l:text = g:rainfall#mark
     elseif l:amount <= 2.0
-      let l:text = g:rainfall#char .. g:rainfall#char
+      let l:text = g:rainfall#mark .. g:rainfall#mark
     else
-      let l:text = g:rainfall#char .. g:rainfall#char .. g:rainfall#char
+      let l:text = g:rainfall#mark .. g:rainfall#mark .. g:rainfall#mark
     endif
     call s:update_message(l:location .. ': ' .. l:text)
   endif
