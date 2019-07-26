@@ -107,8 +107,18 @@ function s:update_message(msg) abort
               \ 'line': &lines-5,
               \ 'col': &columns-5,
               \ 'pos': 'botright',
+              \ 'drag': 1,
+              \ 'close': 'button',
               \ 'tabpage': -1
               \ })
+        " 端末のリサイズへの対応をプラグイン側でやる方法
+        " augroup rainfall
+        "   autocmd!
+        "   autocmd VimResized * call popup_move(s:winid, {
+        "         \ 'line': &lines-5,
+        "         \ 'col': &columns-5,
+        "         \ })
+        " augroup END
       else
         call popup_settext(s:winid, a:msg)
       endif
