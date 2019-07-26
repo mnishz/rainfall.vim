@@ -102,6 +102,8 @@ function s:update_message(msg) abort
               \ 'line': &lines-5,
               \ 'col': &columns-5,
               \ 'pos': 'botright',
+              \ 'drag': 1,
+              \ 'close': 'button',
               \ 'tabpage': -1
               \ })
       else
