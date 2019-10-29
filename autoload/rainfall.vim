@@ -40,7 +40,7 @@ endfunction
 
 function rainfall#is_disabled_today() abort
   let l:result = v:false
-  if readfile(s:file_disable) == [strftime('%Y%m%d')]
+  if filereadable(s:file_disable) && readfile(s:file_disable) == [strftime('%Y%m%d')]
     let l:result = v:true
   endif
   return l:result
