@@ -4,6 +4,7 @@ scriptencoding utf-8
 let s:winid = 0
 let s:timerid = 0
 let s:last_msg = ''
+let s:file_disable = expand('~/.cache/disable_rainfall')
 
 
 function rainfall#enable() abort
@@ -28,6 +29,21 @@ function rainfall#disable() abort
   else
     echo 'already disabled'
   endif
+endfunction
+
+
+function rainfall#disable_today() abort
+  call writefile([strftime('%Y%m%d')], s:file_disable)
+  call rainfall#disable()
+endfunction
+
+
+function rainfall#is_disabled_today() abort
+  let l:result = v:false
+  if readfile(s:file_disable) == [strftime('%Y%m%d')]
+    let l:result = v:true
+  endif
+  return l:result
 endfunction
 
 

@@ -18,10 +18,13 @@ let g:rainfall#mark = get(g:, 'rainfall#mark', '☂')
 let g:rainfall#url = get(g:, 'rainfall#url', 'https://tenki.jp/amedas/3/16/44132.html')
 
 command RainfallEnable call rainfall#enable()
-command RainfallDisable call rainfall#disable()
+" command RainfallDisable call rainfall#disable()
+command RainfallDisableToday call rainfall#disable_today()
 command RainfallClose call rainfall#close()
 
-RainfallEnable
+if !rainfall#is_disabled_today()
+  RainfallEnable
+endif
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
