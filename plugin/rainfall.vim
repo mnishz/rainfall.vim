@@ -1,6 +1,6 @@
 scriptencoding utf-8
 
-if exists('g:loaded_rainfall')
+if exists('g:loaded_rainfall') || !executable('curl')
   finish
 endif
 let g:loaded_rainfall = 1
