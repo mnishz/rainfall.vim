@@ -20,7 +20,7 @@ function rainfall#enable() abort
 endfunction
 
 
-function rainfall#disable() abort
+function rainfall#disable(timer_dummy) abort
   if s:timerid != 0
     call timer_stop(s:timerid)
     let s:timerid = 0
@@ -34,7 +34,7 @@ endfunction
 
 function rainfall#disable_today() abort
   call writefile([strftime('%Y%m%d')], s:file_disable)
-  call rainfall#disable()
+  call rainfall#disable(s:timerid)
 endfunction
 
 
@@ -63,7 +63,7 @@ let s:parsed_data = {
       \ }
 
 
-function s:create_rainfall_job(timer) abort
+function s:create_rainfall_job(timer_dummy) abort
   " initialization
   let s:parsed_data.datetime = ''
   let s:parsed_data.amount_str = ''
@@ -74,7 +74,7 @@ function s:create_rainfall_job(timer) abort
 endfunction
 
 
-function s:parse_data(ch, msg) abort
+function s:parse_data(ch_dummy, msg) abort
   if a:msg =~# 'amedas-point-datetime'
     let s:parsed_data.datetime = a:msg
   endif
@@ -84,11 +84,12 @@ function s:parse_data(ch, msg) abort
 endfunction
 
 
-function s:show_rainfall(ch) abort
+function s:show_rainfall(ch_dummy) abort
   let l:location = s:parsed_data.datetime[match(s:parsed_data.datetime, "<h2>")+4:match(s:parsed_data.datetime, '(')-1]
   let l:amount = str2float(s:parsed_data.amount_str)
 
   if empty(s:parsed_data.datetime) || empty(l:location) || (s:parsed_data.amount_str !=# '0.0' && l:amount == 0.0)
+    call timer_start(3 * 1000, function('rainfall#disable'))
     call s:update_message('error')
     return
   endif
@@ -127,14 +128,14 @@ function s:update_message(msg) abort
               \ 'close': 'button',
               \ 'tabpage': -1
               \ })
-        " 端末のリサイズへの対応をプラグイン側でやる方法
-        " augroup rainfall
-        "   autocmd!
-        "   autocmd VimResized * call popup_move(s:winid, {
-        "         \ 'line': &lines-5,
-        "         \ 'col': &columns-5,
-        "         \ })
-        " augroup END
+        " 端末のリサイズへの対応をプラグイン側でやる
+        augroup RAINFALL
+          autocmd!
+          autocmd VimResized * call popup_move(s:winid, {
+                \ 'line': &lines-5,
+                \ 'col': &columns-5,
+                \ })
+        augroup END
       else
         call popup_settext(s:winid, a:msg)
       endif
